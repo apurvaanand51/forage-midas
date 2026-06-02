@@ -15,7 +15,7 @@ public class TransactionListener {
     private static final Logger logger = LoggerFactory.getLogger(TransactionListener.class);
     private final List<Transaction> received = new ArrayList<>();
 
-    @KafkaListener(topics = "${general.kafka-topic}", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "${general.kafka-topic}", groupId = "midas-core-group", containerFactory = "kafkaListenerContainerFactory")
     public void receive(Transaction transaction) {
         received.add(transaction);
         if (received.size() <= 4) {

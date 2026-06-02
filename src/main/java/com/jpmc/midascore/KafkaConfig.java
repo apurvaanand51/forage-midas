@@ -64,6 +64,7 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, Transaction> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Transaction> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+        factory.getContainerProperties().setGroupId("midas-core-group");
         return factory;
     }
 }
