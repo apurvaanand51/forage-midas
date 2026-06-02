@@ -3,3 +3,8 @@ general:
 
 server:
   port: 33400
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

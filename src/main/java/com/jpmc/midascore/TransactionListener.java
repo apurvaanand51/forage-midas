@@ -1,6 +1,7 @@
 package com.jpmc.midascore;
 
 import com.jpmc.midascore.foundation.Transaction;
+import com.jpmc.midascore.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,15 +14,25 @@ import java.util.List;
 public class TransactionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionListener.class);
+    private final TransactionService transactionService;
     private final List<Transaction> received = new ArrayList<>();
+
+    public TransactionListener(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
 
     @KafkaListener(topics = "${general.kafka-topic}", groupId = "midas-core-group", containerFactory = "kafkaListenerContainerFactory")
     public void receive(Transaction transaction) {
         received.add(transaction);
-        if (received.size() <= 4) {
-            logger.info("Received transaction {}: amount={} senderId={} recipientId={}", received.size(), transaction.getAmount(), transaction.getSenderId(), transaction.getRecipientId());
+        boolean stored = transactionService.recordTransaction(transaction);
+        if (stored) {
+            if (received.size() <= 4) {
+                logger.info("Received transaction {}: amount={} senderId={} recipientId={}", received.size(), transaction.getAmount(), transaction.getSenderId(), transaction.getRecipientId());
+            } else {
+                logger.debug("Received additional transaction: {}", transaction);
+            }
         } else {
-            logger.debug("Received additional transaction: {}", transaction);
+            logger.warn("Discarded invalid transaction: {}", transaction);
         }
     }
 
