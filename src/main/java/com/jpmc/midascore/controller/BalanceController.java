@@ -1,4 +1,4 @@
-package com.jpmc.midascore;
+package com.jpmc.midascore.controller;
 
 import com.jpmc.midascore.foundation.Balance;
 import com.jpmc.midascore.entity.UserRecord;
@@ -9,19 +9,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class BalanceController {
+
     private final UserRepository userRepository;
 
     public BalanceController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/balance")
-    public Balance getBalance(@RequestParam Long userId) {
-        var userOpt = userRepository.findById(userId);
-        if (userOpt == null || userOpt.isEmpty()) {
-            return new Balance(0f);
+    @GetMapping(path = "/balance")
+    public Balance getBalance(@RequestParam(name = "userId") long userId) {
+        UserRecord user = userRepository.findById(userId);
+        float amount = 0.0f;
+        if (user != null) {
+            amount = user.getBalance();
         }
-        UserRecord user = userOpt.get();
-        return new Balance(user.getBalance());
+        return new Balance(amount);
     }
 }
